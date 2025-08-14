@@ -6,6 +6,8 @@ import { currencies, Currency } from "@/utils/country-currencies";
 import { QuickRecipient } from "@/pages/portal";
 import RecipientInput from "../inputs/receipt-input";
 import AmountInput from "../inputs/amount-input";
+import { calcFeeCents, centsToDisplay, convertCentsUSDTo, toCents } from "@/utils/money-helpers";
+import TransferSummary from "./summary-component";
 
 interface SendMoneyFormProps {
   recipient: string;
@@ -25,25 +27,6 @@ interface SendMoneyFormProps {
   maxUSD?: number;
   fxRates?: Record<string, number>;         
   feeBpsByCurrency?: Record<string, number>;
-}
-
-function toCents(input: string): number {
-  const n = Number(input);
-  if (!Number.isFinite(n)) return 0;
-  return Math.ceil(n * 100);
-}
-
-function centsToDisplay(cents: number) {
-  return (cents / 100).toFixed(2);
-}
-
-function calcFeeCents(amountCents: number, feeBps: number): number {
-  return Math.ceil((amountCents * feeBps) / 10000);
-}
-
-function convertCentsUSDTo(usdCents: number, fxRate: number): number {
-  const major = (usdCents / 100) * fxRate;
-  return Math.ceil(major * 100);
 }
 
 const SendMoneyForm: React.FC<SendMoneyFormProps> = ({
@@ -196,36 +179,17 @@ const SendMoneyForm: React.FC<SendMoneyFormProps> = ({
               onChange={(e) => setNote(e.target.value)}
             />
 
-            {/* Summary */}
-            {validAmount && (
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">You send</span>
-                  <span className="font-medium text-gray-800">${centsToDisplay(amountUsdCents)} USD</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Fee ({feePct}) • payout in {currency}</span>
-                  <span className="font-medium text-gray-800">-${centsToDisplay(feeCentsUSD)} USD</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">After fees</span>
-                  <span className="font-medium text-gray-800">${centsToDisplay(amountAfterFeeUsdCents)} USD</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">FX rate</span>
-                  <span className="font-medium text-gray-800">1 USD ≈ {fxRate.toFixed(4)} {currency}</span>
-                </div>
-                <div className="mt-2 pt-2 border-t border-gray-200 flex justify-between items-center">
-                  <span className="text-gray-700 font-semibold">Recipient gets</span>
-                  <span className="text-primary-700 font-bold text-base">
-                    {currencies.find((c) => c.code === currency)?.flag} {centsToDisplay(recipientReceiveCents)} {currency}
-                  </span>
-                </div>
-                <p className="mt-2 text-xs text-gray-500">
-                  All amounts rounded <span className="font-medium">up</span> to the smallest unit.
-                </p>
-              </div>
-            )}
+           {validAmount && (
+  <TransferSummary
+    amountUsdCents={amountUsdCents}
+    feeCentsUSD={feeCentsUSD}
+    amountAfterFeeUsdCents={amountAfterFeeUsdCents}
+    fxRate={fxRate}
+    currency={currency}
+    recipientReceiveCents={recipientReceiveCents}
+    feePct={"feePctLabel"} // you already have this calculated
+  />
+)}
 
             <div className="pt-2">
               <PrimaryButton
