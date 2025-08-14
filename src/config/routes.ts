@@ -6,7 +6,7 @@ export const ROUTES = {
         FORGOT_PASSWORD: '/auth/forgot-password',
     },
     PORTAL:{
-        HOME: "/portal/home",
+        HOME: "/portal",
         SETTINGS: "/portal/settings",
         PROFILE: "/portal/profile",
     }

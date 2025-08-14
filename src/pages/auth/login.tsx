@@ -5,6 +5,7 @@ import PrimaryButton from "@/components/buttons/primary-button";
 import PrimaryInput from "@/components/inputs/primary-input";
 import { MAIN_APP } from "@/config/app_vars";
 import { ROUTES } from "@/config/routes";
+import { login } from "@/services/auth.service";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -14,33 +15,22 @@ function Login() {
   const [formError, setFormError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setFormError(null);
     setIsLoading(true);
-
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, rememberMe }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        setFormError(data?.message || "Failed to login");
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(false);
-      router.push(ROUTES?.PORTAL?.HOME);
-    } catch (err) {
-      console.error(err);
-      setFormError("Unexpected error. Please try again.");
+      setIsLoading(true);
+      await login({ email, password, rememberMe });
+      router.push(ROUTES.PORTAL.HOME);
+    } catch (err: any) {
+      console.error(err.response?.data || err.message);
+      setFormError(err.response?.data?.message || "Login failed. Please try again.");
+    } finally {
       setIsLoading(false);
     }
-  };
+  }
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-50 text-zinc-700 px-6">

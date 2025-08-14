@@ -5,11 +5,14 @@ import PrimaryButton from "@/components/buttons/primary-button";
 import PrimaryInput from "@/components/inputs/primary-input";
 import { MAIN_APP } from "@/config/app_vars";
 import { ROUTES } from "@/config/routes";
+import { register } from "@/services/auth.service";
 
-type Errors = Partial<Record<
-  "firstName" | "lastName" | "email" | "username" | "password" | "confirmPassword" | "terms",
-  string
->>;
+type Errors = Partial<
+  Record<
+    "firstName" | "lastName" | "email" | "password" | "confirmPassword" | "terms" | "form",
+    string
+  >
+>;
 
 function Register() {
   const router = useRouter();
@@ -21,7 +24,6 @@ function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [terms, setTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-    // ...your existing state...
   const [errors, setErrors] = useState<Errors>({});
 
   const validate = () => {
@@ -45,34 +47,26 @@ function Register() {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
 
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
-      // Use your axios client if you prefer:
-      // const res = await apiClient.post("/api/auth/register", { firstName, lastName, email, password });
-
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstName, lastName, email, password }),
+      await register({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
+        password,
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setErrors((prev) => ({ ...prev, form: data?.message || "Failed to register" }));
-        setIsLoading(false);
-        return;
-      }
-
-      // success
-      setIsLoading(false);
-      // redirect to login (or auto-login, your choice)
+      // success → to login
       router.push(ROUTES.AUTH.LOGIN);
     } catch (err: any) {
+      // err is normalized by handleApiError in your service: { message, status, data? }
+      const message = err?.message || "Failed to register";
+      setErrors((prev) => ({ ...prev, form: message }));
+
+      // Optionally map server-side field errors if your API returns them:
+      // if (err?.data?.errors) setErrors((prev) => ({ ...prev, ...err.data.errors }));
+    } finally {
       setIsLoading(false);
-      setErrors((prev) => ({ ...prev, form: "Unexpected error. Please try again." }));
-      console.error(err);
     }
   };
 
@@ -85,6 +79,17 @@ function Register() {
         <p className="text-center text-zinc-500 mb-8">
           Join us in a minute. It’s quick and easy.
         </p>
+
+        {/* Top-level form error */}
+        {errors.form && (
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="mb-4 rounded-lg border border-secondary-500/30 bg-secondary-50 px-4 py-3 text-sm text-secondary-800"
+          >
+            {errors.form}
+          </div>
+        )}
 
         <form onSubmit={handleRegister} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -171,6 +176,7 @@ function Register() {
             isLoading={isLoading}
             className="w-full"
             size="lg"
+            disabled={isLoading}
           >
             Create account
           </PrimaryButton>
