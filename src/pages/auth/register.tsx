@@ -21,6 +21,7 @@ function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [terms, setTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+    // ...your existing state...
   const [errors, setErrors] = useState<Errors>({});
 
   const validate = () => {
@@ -37,19 +38,42 @@ function Register() {
     return next;
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
     const nextErrors = validate();
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
 
-    setIsLoading(true);
-    // Simulate API
-    setTimeout(() => {
+    try {
+      setIsLoading(true);
+
+      // Use your axios client if you prefer:
+      // const res = await apiClient.post("/api/auth/register", { firstName, lastName, email, password });
+
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ firstName, lastName, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrors((prev) => ({ ...prev, form: data?.message || "Failed to register" }));
+        setIsLoading(false);
+        return;
+      }
+
+      // success
       setIsLoading(false);
-      // On success:
-      // router.push("/welcome");
-    }, 1500);
+      // redirect to login (or auto-login, your choice)
+      router.push(ROUTES.AUTH.LOGIN);
+    } catch (err: any) {
+      setIsLoading(false);
+      setErrors((prev) => ({ ...prev, form: "Unexpected error. Please try again." }));
+      console.error(err);
+    }
   };
 
   return (

@@ -3,6 +3,11 @@ export const ROUTES = {
     AUTH: {
         REGISTER: '/auth/register',
         LOGIN: '/auth/login',
+        FORGOT_PASSWORD: '/auth/forgot-password',
     },
-    DASHBOARD: '/dashboard',
+    PORTAL:{
+        HOME: "/portal/home",
+        SETTINGS: "/portal/settings",
+        PROFILE: "/portal/profile",
+    }
 }

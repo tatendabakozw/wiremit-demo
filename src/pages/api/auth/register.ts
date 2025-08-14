@@ -1,4 +1,3 @@
-// src/pages/api/auth/register.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "@/lib/mongoose";
 import bcrypt from "bcryptjs";
