@@ -3,7 +3,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { handleLogout } from "@/lib/logout";
 import {
   ArrowUpRightIcon,
-  Cog6ToothIcon,
   PowerIcon,
 } from "@heroicons/react/24/outline";
 
@@ -12,7 +11,8 @@ import ActivityList, { Activity } from "@/components/dashboard/activity-list";
 import SendMoneyForm from "@/components/dashboard/send-money-form";
 import PrimaryButton from "@/components/buttons/primary-button";
 import { useExchangeRates } from "@/hooks/useExchangRate";
-
+import { useToast } from "@/hooks/useToast"; // 🔹 import toast hook
+import SampleAd from "@/components/dashboard/sample-ad";
 
 // --- Mock Data ---
 export type QuickRecipient = { id: string; name: string; handle: string };
@@ -37,6 +37,7 @@ const mockActivity: Activity[] = Array.from({ length: 48 }).map((_, i) => {
 
 export default function PortalHome() {
   const { me, loading } = useAuth();
+  const { addToast } = useToast(); // 🔹 useToast instance
 
   // 🔹 live FX rates
   const {
@@ -90,15 +91,29 @@ export default function PortalHome() {
 
     setSending(true);
     try {
-      // TODO: Integrate with a real transfer service
       await new Promise((resolve) => setTimeout(resolve, 1200));
-
       setSuccess(`Successfully sent money to ${recipient}.`);
+
+      addToast({
+        title: "Transfer Successful",
+        message: `Sent ${amount} ${currency} to ${recipient}`,
+        type: "success",
+        duration: 4000,
+      });
+
       setAmount("");
       setNote("");
       setRecipient("");
     } catch (err: any) {
-      setError(err?.message || "The transaction failed. Please try again.");
+      const msg = err?.message || "The transaction failed. Please try again.";
+      setError(msg);
+
+      addToast({
+        title: "Transfer Failed",
+        message: msg,
+        type: "error",
+        duration: 5000,
+      });
     } finally {
       setSending(false);
     }
@@ -106,7 +121,6 @@ export default function PortalHome() {
 
   return (
     <div className="bg-gray-50 min-h-screen text-gray-800 font-sans">
-      {/* --- Top Bar --- */}
       <header className="sticky top-0 z-20 bg-white/70 backdrop-blur-lg border-b border-gray-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -129,7 +143,6 @@ export default function PortalHome() {
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-5 gap-8">
-          {/* --- Left Column: Balance & Activity --- */}
           <div className="lg:col-span-3 flex flex-col gap-8">
             <BalanceCard
               balance={balance.USD}
@@ -139,33 +152,35 @@ export default function PortalHome() {
             <ActivityList items={mockActivity} pageSize={15} />
           </div>
 
-          {/* --- Right Column: Send Money Form --- */}
-          <div className="lg:col-span-2">
-            <SendMoneyForm
-              recipient={recipient}
-              setRecipient={setRecipient}
-              quickRecipients={quickRecipients}
-              amount={amount}
-              setAmount={setAmount}
-              note={note}
-              setNote={setNote}
-              currency={currency}
-              setCurrency={setCurrency}
-              onSubmit={handleSend}
+          <div className="lg:col-span-2 space-y-4 ">
+            <div className="flex flex-col gap-4 sticky top-24">
 
-              // 🔹 combine sending + rates loading
-              isLoading={sending || ratesLoading}
+              <SendMoneyForm
+                recipient={recipient}
+                setRecipient={setRecipient}
+                quickRecipients={quickRecipients}
+                amount={amount}
+                setAmount={setAmount}
+                note={note}
+                setNote={setNote}
+                currency={currency}
+                setCurrency={setCurrency}
+                onSubmit={handleSend}
+                isLoading={sending || ratesLoading}
+                error={error ?? ratesError ?? null}
+                success={success}
+                fxRates={rates}
+                feeBpsByCurrency={{ GBP: 1000, ZAR: 2000 }}
+              />
 
-              // 🔹 surface either local error or FX error
-              error={error ?? ratesError ?? null}
-              success={success}
-
-              // 🔹 inject live rates here
-              fxRates={rates}
-
-              // (optional) your fee basis points per currency
-              feeBpsByCurrency={{ GBP: 1000, ZAR: 2000 }}
-            />
+              <SampleAd
+                imageUrl="https://via.placeholder.com/600x200?text=Special+Offer"
+                title="Get 10% Cashback!"
+                description="Transfer money this week and enjoy 10% cashback on fees."
+                ctaText="Learn More"
+                ctaLink="#"
+              />
+            </div>
           </div>
         </div>
       </main>

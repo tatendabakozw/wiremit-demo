@@ -126,7 +126,7 @@ const SendMoneyForm: React.FC<SendMoneyFormProps> = ({
     const topError = validationError || error;
 
     return (
-        <div className="sticky top-24">
+        <div className="">
             <div className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm">
                 <h2 className="text-lg font-semibold text-gray-900">Send Money</h2>
                 <p className="text-sm text-gray-600 mt-0.5">Instantly send to an email or phone number.</p>

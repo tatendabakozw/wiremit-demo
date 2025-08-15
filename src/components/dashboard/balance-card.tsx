@@ -19,7 +19,7 @@ export default function BalanceCard({ balance, onQuickPick, quickRecipients }: {
         
         {/* Floating action button */}
         <button 
-          className="md:flex hidden absolute bottom-5 right-5 h-11 w-11 items-center justify-center rounded-full bg-white hover:bg-gray-50 active:scale-95 transition-all text-gray-700 shadow-md hover:shadow-lg border border-gray-200"
+          className="md:flex hidden cursor-pointer absolute bottom-5 right-5 h-11 w-11 items-center justify-center rounded-full bg-secondary-brand hover:bg-secondary-600 active:scale-95 transition-all text-gray-700 shadow-md hover:shadow-lg border border-secondary-600"
           aria-label="Add new recipient"
         >
           <UserPlusIcon className="h-5 w-5" />
