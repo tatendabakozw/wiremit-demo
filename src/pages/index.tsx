@@ -19,7 +19,7 @@ const Welcome = () => {
     <section className="relative bg-zinc-50 min-h-screen flex items-center justify-center overflow-hidden">
       <div className="container mx-auto px-6 py-12 flex flex-col items-center">
         {/* Badge */}
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-700 mb-8">
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-700 mb-8">
           New & Improved
         </span>
 
@@ -30,8 +30,7 @@ const Welcome = () => {
           </h1>
           
           <p className="text-lg text-gray-600">
-            A financial digital platform that delivers an unmatched customer
-            experience, making your money work harder for you.
+            A financial digital platform that can make it easier for you to send money to family members.
           </p>
         </div>
 
