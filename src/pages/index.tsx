@@ -18,7 +18,7 @@ const Welcome = () => {
 
   return (
     <AuthLayout>
-      <section className="relative bg-zinc-50 min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <div className="container mx-auto px-6 py-12 flex flex-col items-center">
           {/* Badge */}
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-700 mb-8">
