@@ -7,6 +7,7 @@ import { MAIN_APP } from "@/config/app_vars";
 import { ROUTES } from "@/config/routes";
 import { register } from "@/services/auth.service";
 import { useToast } from "@/hooks/useToast";
+import AuthLayout from "@/layouts/auth-layout";
 
 type Errors = Partial<
   Record<
@@ -83,7 +84,7 @@ function Register() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-50 text-zinc-700 px-6">
+    <AuthLayout>
       <div className="w-full max-w-md bg-white border border-zinc-200/50 p-8 rounded-2xl shadow-lg">
         <h1 className="font-bold text-3xl text-zinc-900 text-center mb-2">
           Create your {MAIN_APP.NAME} account
@@ -201,7 +202,7 @@ function Register() {
           Already have an account? Log in
         </PrimaryButton>
       </div>
-    </div>
+    </AuthLayout>
   );
 }
 
