@@ -6,6 +6,7 @@ import PrimaryInput from "@/components/inputs/primary-input";
 import { MAIN_APP } from "@/config/app_vars";
 import { ROUTES } from "@/config/routes";
 import { login } from "@/services/auth.service";
+import { useToast } from "@/hooks/useToast";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -14,6 +15,8 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const router = useRouter();
+  const { addToast } = useToast()
+
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -22,10 +25,21 @@ function Login() {
     try {
       setIsLoading(true);
       await login({ email, password, rememberMe });
+      addToast({
+        title: 'Login successful',
+        message: "User loged in sucessfully. Enjoy your stay!",
+        type: 'success',
+        duration: 4000,
+      });
       router.push(ROUTES.PORTAL.HOME);
     } catch (err: any) {
+      addToast({
+        title: 'Failed to register',
+        message: err.response?.data || err.message || "Failed to login, Please try again",
+        type: 'error',
+        duration: 4000,
+      });
       console.error(err.response?.data || err.message);
-      setFormError(err.response?.data?.message || "Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }

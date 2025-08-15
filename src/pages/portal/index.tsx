@@ -119,10 +119,6 @@ export default function PortalHome() {
             <span className="hidden sm:block text-gray-500">
               {me ? `${me.email}` : "Not signed in"}
             </span>
-            <PrimaryButton variant="ghost" size="sm" className="hidden sm:inline-flex">
-              <Cog6ToothIcon className="h-4 w-4 mr-1.5" />
-              Settings
-            </PrimaryButton>
             <PrimaryButton variant="outline" size="sm" onClick={handleLogout}>
               <PowerIcon className="h-4 w-4 mr-1.5" />
               Logout

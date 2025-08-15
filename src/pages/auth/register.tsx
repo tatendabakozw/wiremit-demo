@@ -6,21 +6,23 @@ import PrimaryInput from "@/components/inputs/primary-input";
 import { MAIN_APP } from "@/config/app_vars";
 import { ROUTES } from "@/config/routes";
 import { register } from "@/services/auth.service";
+import { useToast } from "@/hooks/useToast";
 
 type Errors = Partial<
   Record<
-    "firstName" | "lastName" | "email" | "password" | "confirmPassword" | "terms" | "form",
+    "firstName" | "lastName" | "email" | "password" | "confirmPassword" | "terms",
     string
   >
 >;
 
 function Register() {
   const router = useRouter();
+  const { addToast } = useToast();
 
   const [firstName, setFirstName] = useState("");
-  const [lastName,  setLastName]  = useState("");
-  const [email,     setEmail]     = useState("");
-  const [password,  setPassword]  = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [terms, setTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -29,10 +31,10 @@ function Register() {
   const validate = () => {
     const next: Errors = {};
     if (!firstName.trim()) next.firstName = "First name is required.";
-    if (!lastName.trim())  next.lastName  = "Last name is required.";
-    if (!email.trim())     next.email     = "Email is required.";
-    if (!password)         next.password  = "Password is required.";
-    if (!confirmPassword)  next.confirmPassword = "Please confirm your password.";
+    if (!lastName.trim()) next.lastName = "Last name is required.";
+    if (!email.trim()) next.email = "Email is required.";
+    if (!password) next.password = "Password is required.";
+    if (!confirmPassword) next.confirmPassword = "Please confirm your password.";
     if (password && confirmPassword && password !== confirmPassword) {
       next.confirmPassword = "Passwords do not match.";
     }
@@ -56,15 +58,25 @@ function Register() {
         password,
       });
 
-      // success → to login
+      // ✅ Toast success
+      addToast({
+        title: "Registration successful",
+        message: "Your account has been created. Please log in to continue.",
+        type: "success",
+        duration: 4000,
+      });
+
       router.push(ROUTES.AUTH.LOGIN);
     } catch (err: any) {
-      // err is normalized by handleApiError in your service: { message, status, data? }
       const message = err?.message || "Failed to register";
-      setErrors((prev) => ({ ...prev, form: message }));
 
-      // Optionally map server-side field errors if your API returns them:
-      // if (err?.data?.errors) setErrors((prev) => ({ ...prev, ...err.data.errors }));
+      // ❌ Toast error
+      addToast({
+        title: "Registration failed",
+        message,
+        type: "error",
+        duration: 5000,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -80,17 +92,6 @@ function Register() {
           Join us in a minute. It’s quick and easy.
         </p>
 
-        {/* Top-level form error */}
-        {errors.form && (
-          <div
-            role="alert"
-            aria-live="assertive"
-            className="mb-4 rounded-lg border border-secondary-500/30 bg-secondary-50 px-4 py-3 text-sm text-secondary-800"
-          >
-            {errors.form}
-          </div>
-        )}
-
         <form onSubmit={handleRegister} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <PrimaryInput
@@ -99,7 +100,6 @@ function Register() {
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               error={errors.firstName}
-              variant="default"
               required
             />
             <PrimaryInput
@@ -108,7 +108,6 @@ function Register() {
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               error={errors.lastName}
-              variant="default"
               required
             />
           </div>
@@ -120,7 +119,6 @@ function Register() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             error={errors.email}
-            variant="default"
             required
           />
 
@@ -131,7 +129,6 @@ function Register() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             error={errors.password}
-            variant="default"
             required
           />
 
@@ -142,7 +139,6 @@ function Register() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             error={errors.confirmPassword}
-            variant="default"
             required
           />
 
@@ -157,19 +153,24 @@ function Register() {
               />
               <span className="text-sm text-zinc-700">
                 I agree to the{" "}
-                <Link href="/terms" className="text-primary-600 hover:text-primary-700 underline underline-offset-2">
+                <Link
+                  href="/terms"
+                  className="text-primary-600 hover:text-primary-700 underline underline-offset-2"
+                >
                   Terms & Conditions
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy" className="text-primary-600 hover:text-primary-700 underline underline-offset-2">
+                <Link
+                  href="/privacy"
+                  className="text-primary-600 hover:text-primary-700 underline underline-offset-2"
+                >
                   Privacy Policy
-                </Link>.
+                </Link>
+                .
               </span>
             </label>
           </div>
-          {errors.terms && (
-            <p className="text-sm text-secondary-700 -mt-2">{errors.terms}</p>
-          )}
+          {errors.terms && <p className="text-sm text-secondary-700 -mt-2">{errors.terms}</p>}
 
           <PrimaryButton
             type="submit"

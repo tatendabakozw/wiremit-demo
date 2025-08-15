@@ -9,7 +9,7 @@ export default function Document() {
         crossOrigin="anonymous"
       />
       <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet" />
-      <body className="antialiased font-sans">
+      <body className="antialiased font-sans bg-zinc-50">
         <Main />
         <NextScript />
       </body>
