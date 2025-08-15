@@ -11,6 +11,8 @@ import BalanceCard from "@/components/dashboard/balance-card";
 import ActivityList, { Activity } from "@/components/dashboard/activity-list";
 import SendMoneyForm from "@/components/dashboard/send-money-form";
 import PrimaryButton from "@/components/buttons/primary-button";
+import { useExchangeRates } from "@/hooks/useExchangRate";
+
 
 // --- Mock Data ---
 export type QuickRecipient = { id: string; name: string; handle: string };
@@ -35,11 +37,19 @@ const mockActivity: Activity[] = Array.from({ length: 48 }).map((_, i) => {
 
 export default function PortalHome() {
   const { me, loading } = useAuth();
+
+  // 🔹 live FX rates
+  const {
+    rates,
+    loading: ratesLoading,
+    error: ratesError,
+  } = useExchangeRates();
+
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
-  const [currency, setCurrency] = useState("GBP"); // Default recipient currency
-  
+  const [currency, setCurrency] = useState("GBP");
+
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -52,7 +62,7 @@ export default function PortalHome() {
       return () => clearTimeout(timer);
     }
   }, [success]);
-  
+
   if (loading) return null;
 
   const onQuickPick = (r: QuickRecipient) => {
@@ -63,8 +73,7 @@ export default function PortalHome() {
     if (!recipient.trim()) return "Recipient is required.";
     const numeric = Number(amount);
     if (!amount || Number.isNaN(numeric) || numeric <= 0) return "Please enter a valid amount.";
-    if (numeric > balance.USD)
-      return "Amount exceeds available USD balance.";
+    if (numeric > balance.USD) return "Amount exceeds available USD balance.";
     return null;
   };
 
@@ -83,7 +92,7 @@ export default function PortalHome() {
     try {
       // TODO: Integrate with a real transfer service
       await new Promise((resolve) => setTimeout(resolve, 1200));
-      
+
       setSuccess(`Successfully sent money to ${recipient}.`);
       setAmount("");
       setNote("");
@@ -124,7 +133,6 @@ export default function PortalHome() {
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-5 gap-8">
-          
           {/* --- Left Column: Balance & Activity --- */}
           <div className="lg:col-span-3 flex flex-col gap-8">
             <BalanceCard
@@ -140,7 +148,7 @@ export default function PortalHome() {
             <SendMoneyForm
               recipient={recipient}
               setRecipient={setRecipient}
-              quickRecipients={quickRecipients} // Pass the recipients list
+              quickRecipients={quickRecipients}
               amount={amount}
               setAmount={setAmount}
               note={note}
@@ -148,9 +156,19 @@ export default function PortalHome() {
               currency={currency}
               setCurrency={setCurrency}
               onSubmit={handleSend}
-              isLoading={sending}
-              error={error}
+
+              // 🔹 combine sending + rates loading
+              isLoading={sending || ratesLoading}
+
+              // 🔹 surface either local error or FX error
+              error={error ?? ratesError ?? null}
               success={success}
+
+              // 🔹 inject live rates here
+              fxRates={rates}
+
+              // (optional) your fee basis points per currency
+              feeBpsByCurrency={{ GBP: 1000, ZAR: 2000 }}
             />
           </div>
         </div>
