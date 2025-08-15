@@ -7,9 +7,8 @@ import {
   PowerIcon,
 } from "@heroicons/react/24/outline";
 
-// Import your child components
 import BalanceCard from "@/components/dashboard/balance-card";
-import ActivityList from "@/components/dashboard/activity-list";
+import ActivityList, { Activity } from "@/components/dashboard/activity-list";
 import SendMoneyForm from "@/components/dashboard/send-money-form";
 import PrimaryButton from "@/components/buttons/primary-button";
 
@@ -21,16 +20,21 @@ export const quickRecipients: QuickRecipient[] = [
   { id: "3", name: "Nyasha C.", handle: "nyasha@example.com" },
 ];
 
-export const recentActivity = [
-  { id: 1, type: 'send', title: "Sent to Tariro", meta: "USD • Aug 12", amount: "- $45.00" },
-  { id: 2, type: 'deposit', title: "Top-up from Bank", meta: "USD • Aug 10", amount: "+ $100.00" },
-  { id: 3, type: 'send', title: "Sent to Kuda", meta: "USD • Aug 05", amount: "- $12.50" },
-];
+const mockActivity: Activity[] = Array.from({ length: 48 }).map((_, i) => {
+  const isSend = Math.random() > 0.5;
+  return {
+    id: i + 1,
+    type: isSend ? "send" : "receive",
+    title: isSend ? "Sent Money" : "Received Money",
+    meta: `${isSend ? "to" : "from"} John Doe • USD • ${new Date(
+      Date.now() - i * 86400000
+    ).toLocaleDateString()}`,
+    amount: `${isSend ? "-" : "+"}$${(Math.random() * 100 + 5).toFixed(2)}`,
+  };
+});
 
 export default function PortalHome() {
   const { me, loading } = useAuth();
-  
-  // --- State Management for the Form ---
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
@@ -40,10 +44,8 @@ export default function PortalHome() {
   const [success, setSuccess] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
 
-  // Demo balance
   const balance = useMemo(() => ({ USD: 1842.75, ZWL: 0 }), []);
 
-  // Clear success message after a few seconds
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => setSuccess(null), 5000);
@@ -51,18 +53,16 @@ export default function PortalHome() {
     }
   }, [success]);
   
-  if (loading) return null; // Or a loading spinner screen
+  if (loading) return null;
 
   const onQuickPick = (r: QuickRecipient) => {
     setRecipient(r.handle);
   };
 
-  // This validation can be simplified or moved if the form handles it
   const validate = () => {
     if (!recipient.trim()) return "Recipient is required.";
     const numeric = Number(amount);
     if (!amount || Number.isNaN(numeric) || numeric <= 0) return "Please enter a valid amount.";
-    // Balance check might need to be more sophisticated if you have multiple currency balances
     if (numeric > balance.USD)
       return "Amount exceeds available USD balance.";
     return null;
@@ -73,7 +73,6 @@ export default function PortalHome() {
     setError(null);
     setSuccess(null);
 
-    // The form now has its own internal validation, but we can keep a top-level one
     const validationError = validate();
     if (validationError) {
       setError(validationError);
@@ -133,7 +132,7 @@ export default function PortalHome() {
               onQuickPick={onQuickPick}
               quickRecipients={quickRecipients}
             />
-            <ActivityList items={recentActivity} />
+            <ActivityList items={mockActivity} pageSize={15} />
           </div>
 
           {/* --- Right Column: Send Money Form --- */}
