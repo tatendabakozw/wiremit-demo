@@ -67,7 +67,7 @@ const SendMoneyForm: React.FC<SendMoneyFormProps> = ({
     error,
     success,
     minUSD = 1,
-    maxUSD = 5000,
+    maxUSD = 20,
     fxRates = { GBP: 0.78, ZAR: 18.0, USD: 1 },
     feeBpsByCurrency = { GBP: 1000, ZAR: 2000 },
 }) => {
@@ -217,12 +217,13 @@ const SendMoneyForm: React.FC<SendMoneyFormProps> = ({
             {/* AmountInput */}
             <motion.div variants={itemVariants}>
               <AmountInput
-                label="You send"
-                amount={amount}
-                setAmount={setAmount}
-                selectedCurrency={selectedCurrencyObject}
-                setSelectedCurrency={handleCurrencyChange}
-              />
+  label="You send"
+  amount={amount}
+  setAmount={setAmount}
+  selectedCurrency={selectedCurrencyObject}
+  setSelectedCurrency={handleCurrencyChange}
+  hint={`Maximum transfer: $${maxUSD.toFixed(2)}`}
+/>
             </motion.div>
 
             {/* Note */}

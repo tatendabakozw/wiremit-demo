@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDownIcon, CheckIcon } from '@heroicons/react/24/solid';
 import { currencies, Currency } from '@/utils/country-currencies';
 
-// Define the props for the updated component
 interface AmountInputProps {
   amount: string;
   setAmount: (value: string) => void;
@@ -10,11 +9,11 @@ interface AmountInputProps {
   setSelectedCurrency: (currency: Currency) => void;
   label?: string;
   editable?: boolean;
+  hint?: string;
+  maxAmount?: number;
+  showMaxHint?: boolean;
 }
 
-/**
- * A reusable input component for entering a monetary amount with a currency selector.
- */
 const AmountInput: React.FC<AmountInputProps> = ({
   amount,
   setAmount,
@@ -22,11 +21,13 @@ const AmountInput: React.FC<AmountInputProps> = ({
   setSelectedCurrency,
   label = 'Amount',
   editable = true,
+  hint,
+  maxAmount,
+  showMaxHint = true,
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -42,28 +43,40 @@ const AmountInput: React.FC<AmountInputProps> = ({
     setShowDropdown(false);
   };
 
-  // Allow only numbers and a single decimal point for the amount
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
-    // Regex to allow numbers and one decimal point with up to 2 decimal places
     const validAmountRegex = /^\d*\.?\d{0,2}$/;
     if (validAmountRegex.test(value) || value === '') {
       setAmount(value);
     }
   };
 
+  // Calculate if amount exceeds max
+  const amountExceedsMax = maxAmount !== undefined && Number(amount) > maxAmount;
+
   return (
     <div className="w-full">
-      <label htmlFor="amount-input" className="block text-sm font-medium text-gray-700 mb-1">
-        {label}
-      </label>
+      <div className="flex justify-between items-center mb-1">
+        <label htmlFor="amount-input" className="block text-sm font-medium text-gray-700">
+          {label}
+        </label>
+        {showMaxHint && maxAmount !== undefined && (
+          <span className="text-xs text-gray-500">
+            Max: {selectedCurrency.symbol}{maxAmount.toFixed(2)}
+          </span>
+        )}
+      </div>
+
       <div className="relative flex items-center">
-        {/* Amount Input */}
         <input
           id="amount-input"
-          type="text" // Use text to better control the input format via regex
+          type="text"
           inputMode="decimal"
-          className={`w-full pl-4 pr-28 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors ${
+          className={`w-full pl-4 pr-28 py-2.5 border ${
+            amountExceedsMax ? 'border-secondary-500' : 'border-gray-300'
+          } rounded-xl focus:outline-none focus:ring-2 ${
+            amountExceedsMax ? 'focus:ring-secondary-500/20' : 'focus:ring-primary-500/20'
+          } focus:border-primary-500 transition-colors ${
             !editable ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'
           }`}
           placeholder="0.00"
@@ -109,6 +122,18 @@ const AmountInput: React.FC<AmountInputProps> = ({
             </div>
           )}
         </div>
+      </div>
+
+      {/* Hint and validation messages */}
+      <div className="mt-1 space-y-1">
+        {hint && !amountExceedsMax && (
+          <p className="text-xs text-gray-500">{hint}</p>
+        )}
+        {amountExceedsMax && (
+          <p className="text-xs text-secondary-600">
+            Amount exceeds maximum of {selectedCurrency.symbol}{maxAmount?.toFixed(2)}
+          </p>
+        )}
       </div>
     </div>
   );
