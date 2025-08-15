@@ -173,13 +173,7 @@ export default function PortalHome() {
                 feeBpsByCurrency={{ GBP: 1000, ZAR: 2000 }}
               />
 
-              <SampleAd
-                imageUrl="https://via.placeholder.com/600x200?text=Special+Offer"
-                title="Get 10% Cashback!"
-                description="Transfer money this week and enjoy 10% cashback on fees."
-                ctaText="Learn More"
-                ctaLink="#"
-              />
+              <SampleAd />
             </div>
           </div>
         </div>
