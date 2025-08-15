@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircleIcon, ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 import PrimaryButton from "@/components/buttons/primary-button";
 import PrimaryInput from "../inputs/primary-input";
@@ -8,6 +9,28 @@ import RecipientInput from "../inputs/receipt-input";
 import AmountInput from "../inputs/amount-input";
 import { calcFeeCents, centsToDisplay, convertCentsUSDTo, toCents } from "@/utils/money-helpers";
 import TransferSummary from "./summary-component";
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+};
+
+const alertVariants = {
+  hidden: { opacity: 0, height: 0 },
+  show: { opacity: 1, height: "auto", transition: { duration: 0.3 } },
+  exit: { opacity: 0, height: 0, transition: { duration: 0.2 } },
+};
 
 interface SendMoneyFormProps {
     recipient: string;
@@ -126,86 +149,129 @@ const SendMoneyForm: React.FC<SendMoneyFormProps> = ({
     const topError = validationError || error;
 
     return (
-        <div className="">
-            <div className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm">
-                <h2 className="text-lg font-semibold text-gray-900">Send Money</h2>
-                <p className="text-sm text-gray-600 mt-0.5">Instantly send to an email or phone number.</p>
+     <motion.div
+      initial="hidden"
+      animate="show"
+      variants={containerVariants}
+      className=""
+    >
+      <motion.div 
+        variants={itemVariants}
+        className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
+      >
+        <motion.div variants={itemVariants}>
+          <h2 className="text-lg font-semibold text-gray-900">Send Money</h2>
+          <p className="text-sm text-gray-600 mt-0.5">
+            Instantly send to an email or phone number.
+          </p>
+        </motion.div>
 
-                <form onSubmit={onSubmit} className="mt-6">
-                    <fieldset disabled={isLoading || !!success} className="space-y-5">
-                        {success && (
-                            <div className="rounded-lg bg-primary-50 p-4 text-sm text-primary-800 flex items-start gap-3">
-                                <CheckCircleIcon className="h-5 w-5 text-primary-500 flex-shrink-0 mt-0.5" />
-                                <div>
-                                    <h3 className="font-semibold">Success</h3>
-                                    <p className="mt-1">{success}</p>
-                                </div>
-                            </div>
-                        )}
+        <form onSubmit={onSubmit} className="mt-6">
+          <fieldset disabled={isLoading || !!success} className="space-y-5">
+            <AnimatePresence mode="wait">
+              {success && (
+                <motion.div
+                  key="success"
+                  variants={alertVariants}
+                  initial="hidden"
+                  animate="show"
+                  exit="exit"
+                  className="rounded-lg bg-primary-50 p-4 text-sm text-primary-800 flex items-start gap-3"
+                >
+                  <CheckCircleIcon className="h-5 w-5 text-primary-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold">Success</h3>
+                    <p className="mt-1">{success}</p>
+                  </div>
+                </motion.div>
+              )}
 
-                        {topError && (
-                            <div className="rounded-lg bg-secondary-50 p-4 text-sm text-secondary-900 flex items-start gap-3">
-                                <ExclamationTriangleIcon className="h-5 w-5 text-secondary-500 flex-shrink-0 mt-0.5" />
-                                <div>
-                                    <h3 className="font-semibold">Attention needed</h3>
-                                    <p className="mt-1">{topError}</p>
-                                </div>
-                            </div>
-                        )}
+              {topError && !success && (
+                <motion.div
+                  key="error"
+                  variants={alertVariants}
+                  initial="hidden"
+                  animate="show"
+                  exit="exit"
+                  className="rounded-lg bg-secondary-50 p-4 text-sm text-secondary-900 flex items-start gap-3"
+                >
+                  <ExclamationTriangleIcon className="h-5 w-5 text-secondary-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold">Attention needed</h3>
+                    <p className="mt-1">{topError}</p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-                        {/* Recipient (with quick picks) */}
-                        <RecipientInput
-                            label="Recipient"
-                            recipient={recipient}
-                            setRecipient={setRecipient}
-                            quickRecipients={quickRecipients}
-                        />
+            {/* Recipient (with quick picks) */}
+            <motion.div variants={itemVariants}>
+              <RecipientInput
+                label="Recipient"
+                recipient={recipient}
+                setRecipient={setRecipient}
+                quickRecipients={quickRecipients}
+              />
+            </motion.div>
 
-                        {/* AmountInput: amount is USD; currency picker = RECIPIENT currency */}
-                        <AmountInput
-                            label="You send"
-                            //   hint="Amount entered is in USD. Use the currency picker to choose recipient currency."
-                            amount={amount}
-                            setAmount={setAmount}
-                            selectedCurrency={selectedCurrencyObject}
-                            setSelectedCurrency={handleCurrencyChange}
-                        />
+            {/* AmountInput */}
+            <motion.div variants={itemVariants}>
+              <AmountInput
+                label="You send"
+                amount={amount}
+                setAmount={setAmount}
+                selectedCurrency={selectedCurrencyObject}
+                setSelectedCurrency={handleCurrencyChange}
+              />
+            </motion.div>
 
-                        {/* Note */}
-                        <PrimaryInput
-                            label="Note (optional)"
-                            placeholder="What’s this for?"
-                            value={note}
-                            onChange={(e) => setNote(e.target.value)}
-                        />
+            {/* Note */}
+            <motion.div variants={itemVariants}>
+              <PrimaryInput
+                label="Note (optional)"
+                placeholder="What's this for?"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              />
+            </motion.div>
 
-                        {validAmount && (
-                            <TransferSummary
-                                amountUsdCents={amountUsdCents}
-                                feeCentsUSD={feeCentsUSD}
-                                amountAfterFeeUsdCents={amountAfterFeeUsdCents}
-                                fxRate={fxRate}
-                                currency={currency}
-                                recipientReceiveCents={recipientReceiveCents}
-                                feePct={"feePctLabel"} // you already have this calculated
-                            />
-                        )}
+            <AnimatePresence>
+              {validAmount && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <TransferSummary
+                    amountUsdCents={amountUsdCents}
+                    feeCentsUSD={feeCentsUSD}
+                    amountAfterFeeUsdCents={amountAfterFeeUsdCents}
+                    fxRate={fxRate}
+                    currency={currency}
+                    recipientReceiveCents={recipientReceiveCents}
+                    feePct={"feePctLabel"}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-                        <div className="pt-2">
-                            <PrimaryButton
-                                type="submit"
-                                isLoading={isLoading}
-                                className="w-full"
-                                size="lg"
-                                disabled={!!validationError || !recipient}
-                            >
-                                {isLoading ? "Sending..." : "Confirm and Send"}
-                            </PrimaryButton>
-                        </div>
-                    </fieldset>
-                </form>
-            </div>
-        </div>
+            <motion.div variants={itemVariants} className="pt-2">
+              <PrimaryButton
+                type="submit"
+                isLoading={isLoading}
+                className="w-full"
+                size="lg"
+                disabled={!!validationError || !recipient}
+                // whileTap={{ scale: 0.98 }}
+              >
+                {isLoading ? "Sending..." : "Confirm and Send"}
+              </PrimaryButton>
+            </motion.div>
+          </fieldset>
+        </form>
+      </motion.div>
+    </motion.div>
     );
 };
 
