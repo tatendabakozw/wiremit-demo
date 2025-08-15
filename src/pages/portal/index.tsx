@@ -4,8 +4,9 @@ import { handleLogout } from "@/lib/logout";
 import {
   ArrowUpRightIcon,
   PowerIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
-
+import { motion, AnimatePresence } from "framer-motion";
 import BalanceCard from "@/components/dashboard/balance-card";
 import ActivityList, { Activity } from "@/components/dashboard/activity-list";
 import SendMoneyForm from "@/components/dashboard/send-money-form";
@@ -54,6 +55,8 @@ export default function PortalHome() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+
+   const [showMobileForm, setShowMobileForm] = useState(false);
 
   const balance = useMemo(() => ({ USD: 1842.75, ZWL: 0 }), []);
 
@@ -152,9 +155,9 @@ export default function PortalHome() {
             <ActivityList items={mockActivity} pageSize={15} />
           </div>
 
-          <div className="lg:col-span-2 space-y-4 ">
-            <div className="flex flex-col gap-4 sticky top-24">
-
+          {/* Right column - modified for mobile */}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="hidden lg:flex flex-col gap-4 sticky top-24">
               <SendMoneyForm
                 recipient={recipient}
                 setRecipient={setRecipient}
@@ -172,10 +175,64 @@ export default function PortalHome() {
                 fxRates={rates}
                 feeBpsByCurrency={{ GBP: 1000, ZAR: 2000 }}
               />
-
-              <SampleAd />
             </div>
+              <SampleAd />
+
+            {/* Mobile form overlay */}
+            <AnimatePresence>
+              {showMobileForm && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ type: "spring", damping: 25 }}
+                  className="fixed inset-0 z-50 bg-zinc-50 p-6 overflow-y-auto lg:hidden"
+                >
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-bold">Send Money</h2>
+                    <button
+                      onClick={() => setShowMobileForm(false)}
+                      className="p-2 rounded-full bg-zinc-200"
+                    >
+                      <XMarkIcon className="h-5 w-5 text-gray-500" />
+                    </button>
+                  </div>
+                  <SendMoneyForm
+                    recipient={recipient}
+                    setRecipient={setRecipient}
+                    quickRecipients={quickRecipients}
+                    amount={amount}
+                    setAmount={setAmount}
+                    note={note}
+                    setNote={setNote}
+                    currency={currency}
+                    setCurrency={setCurrency}
+                    onSubmit={(e) => {
+                      handleSend(e);
+                      setShowMobileForm(false);
+                    }}
+                    isLoading={sending || ratesLoading}
+                    error={error ?? ratesError ?? null}
+                    success={success}
+                    fxRates={rates}
+                    feeBpsByCurrency={{ GBP: 1000, ZAR: 2000 }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
+        </div>
+
+        {/* Floating action button for mobile */}
+        <div className="fixed bottom-6 right-6 z-40 lg:hidden">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowMobileForm(!showMobileForm)}
+            className="p-4 bg-primary-600 rounded-full shadow-lg"
+          >
+            <ArrowUpRightIcon className="h-6 w-6 text-white" />
+          </motion.button>
         </div>
       </main>
       <footer className="py-6" />
