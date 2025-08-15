@@ -16,42 +16,47 @@ const Welcome = () => {
   };
 
   return (
-    <section className="bg-zinc-50 min-h-screen flex flex-col justify-center">
-      <div className="container mx-auto px-6 lg:px-12 flex flex-col-reverse lg:flex-row items-center gap-12 lg:gap-20">
-        {/* Left column: Text content */}
-        <div className="flex-1 flex flex-col items-start text-left">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">
+    <section className="relative bg-zinc-50 min-h-screen flex items-center justify-center overflow-hidden">
+      <div className="container mx-auto px-6 py-12 flex flex-col items-center">
+        {/* Badge */}
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-700 mb-8">
+          New & Improved
+        </span>
+
+        {/* Hero content */}
+        <div className="max-w-lg mx-auto flex flex-col items-center text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4">
             Welcome to <span className="text-primary-600">MizuCash</span>
           </h1>
-          <p className="mt-6 text-lg text-gray-600 max-w-lg">
+          
+          <p className="text-lg text-gray-600">
             A financial digital platform that delivers an unmatched customer
             experience, making your money work harder for you.
           </p>
-
-          <div className="mt-8 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <PrimaryButton
-              size="lg"
-              className="sm:w-auto w-full"
-              onClick={handleRegister}
-            >
-              Get Started
-            </PrimaryButton>
-            <PrimaryButton
-              variant="outline"
-              size="lg"
-              className="sm:w-auto w-full"
-              onClick={handleLogin}
-            >
-              I already have an account
-            </PrimaryButton>
-          </div>
         </div>
 
-        {/* Right column: Illustration */}
-        <div className="flex-1 flex justify-center items-center">
-          <div className="w-full max-w-md lg:max-w-lg">
-            <AbstractIllustration />
-          </div>
+        {/* Centered and enlarged illustration */}
+        <div className="">
+          <AbstractIllustration />
+        </div>
+
+        {/* CTA Buttons */}
+        <div className="flex flex-col gap-3 w-full max-w-xs">
+          <PrimaryButton
+            size="lg"
+            className="w-full"
+            onClick={handleRegister}
+          >
+            Get Started
+          </PrimaryButton>
+          <PrimaryButton
+            variant="secondary"
+            size="lg"
+            className="w-full"
+            onClick={handleLogin}
+          >
+            I already have an account
+          </PrimaryButton>
         </div>
       </div>
     </section>
